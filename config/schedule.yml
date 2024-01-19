@@ -1,0 +1,9 @@
+fetch_user_details_job:
+  cron: "0 * * * *"
+  class: "FetchUserDetailsJob"
+  queue: "default"
+
+daily_record_job:
+  cron: '58 23 * * *'
+  class: "CreateDailyRecordJob"
+  queue: "default"

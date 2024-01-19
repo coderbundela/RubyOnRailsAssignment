@@ -1,0 +1,99 @@
+<div>
+<div align="center">
+<h1 >User List</h1>
+<h4> Total users {{ users_count }}</h4>
+</div> 
+<div align="right">
+    <input type="text" id="searchInput" placeholder="Search by Name">
+    <button id="searchButton">Search</button>
+</div>
+<div align="left">
+    <h3 ><a href="{{ 'daily_records' | route }}">Daily Record</a></h3>
+</div>
+</div>
+<div align="center">
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>UUID</th>
+      <th>Name</th>
+      <th>Gender</th>
+      <th>Age</th>
+      <th>Location</th>
+      <th>Created At</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for user in users %}
+      <tr>
+        <td>{{ user.id }}</td>
+        <td>{{ user.uuid }}</td>
+        <td>{{ user.name | json_parse | escape }}</td>
+        <td>{{ user.gender }}</td>
+        <td>{{ user.age }}</td>
+        <td>{{ user.location | json_parse | escape }}</td>
+        <td>{{ user.created_at | date: "%Y-%m-%d %H:%M" }}</td>
+
+        <td>
+            <a href="#" class="delete-user" data-uuid="{{ user.id }}">Delete</a>
+        </td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+<script>
+  $(document).ready(function() {
+    $('.delete-user').on('click', function(event) {
+      event.preventDefault();
+      const userUuid = $(this).data('uuid');
+      deleteUser(userUuid);
+    });
+
+    function deleteUser(userId) {
+      // AJAX request to delete user
+      $.ajax({
+        url: `/users/${userId}`,
+        type: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': $('meta[name="csrf-token"]').attr('content')
+        },
+        success: function(response) {
+          console.log('User deleted successfully');
+          location.reload();
+          // You may want to update the UI, e.g., remove the deleted row
+        },
+        error: function(error) {
+          console.error('Failed to delete user');
+        }
+      });
+    }
+    $('#searchButton').on('click', function() {
+      const searchTerm = $('#searchInput').val();
+      searchUsers(searchTerm);
+    });
+
+    function searchUsers(searchTerm) {
+      // AJAX request to search users
+      $.ajax({
+        url: '/users/search',
+        type: 'GET',
+        dataType: 'html',
+        data: { search: searchTerm },
+        success: function(response) {
+          // Handle the response, update the UI with the search results
+          console.log('Search successful:', response);
+          $('#users_list').html(response);
+        },
+        error: function(error) {
+          console.error('Failed to search users');
+          $('#users_list').html(response);
+        }
+      });
+    }
+  });
+
+</script>
